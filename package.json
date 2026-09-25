@@ -1,0 +1,37 @@
+{
+	"name": "typee-monorepo",
+	"private": true,
+	"version": "0.0.1",
+	"type": "module",
+	"workspaces": [
+		"apps/*"
+	],
+	"scripts": {
+		"dev": "bun run --cwd apps/web dev",
+		"dev:all": "concurrently --kill-others --names pocketbase,sveltekit --prefix-colors cyan,green \"bun run pb:dev\" \"bun run dev\"",
+		"build": "bun run --cwd apps/web build",
+		"preview": "bun run --cwd apps/web preview",
+		"check": "bun run --cwd apps/web check",
+		"check:watch": "bun run --cwd apps/web check:watch",
+		"lint": "prettier --check . && eslint .",
+		"format": "prettier --write .",
+		"pb:dev": "bun run --cwd apps/pocketbase dev",
+		"smoke:race": "bun scripts/smoke-isolated.ts race",
+		"smoke:browser": "bun scripts/smoke-isolated.ts browser"
+	},
+	"devDependencies": {
+		"@eslint/js": "^10.0.1",
+		"@types/node": "^24",
+		"concurrently": "^10.0.5",
+		"eslint": "^10.4.1",
+		"eslint-config-prettier": "^10.1.8",
+		"eslint-plugin-svelte": "^3.19.0",
+		"globals": "^17.6.0",
+		"playwright": "^1.63.0",
+		"prettier": "^3.8.3",
+		"prettier-plugin-svelte": "^4.1.0",
+		"prettier-plugin-tailwindcss": "^0.8.0",
+		"typescript": "^6.0.3",
+		"typescript-eslint": "^8.60.1"
+	}
+}

@@ -1,0 +1,11 @@
+**/node_modules
+**/.svelte-kit
+apps/web/build
+apps/pocketbase/pocketbase
+apps/pocketbase/pb_data
+.git
+.github
+.env
+.env.*
+.DS_Store
+

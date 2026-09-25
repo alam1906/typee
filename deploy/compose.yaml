@@ -1,0 +1,44 @@
+services:
+  web:
+    image: ${TYPEE_IMAGE_PREFIX:?Set TYPEE_IMAGE_PREFIX in Dokploy}-web:latest
+    pull_policy: always
+    restart: unless-stopped
+    depends_on:
+      pocketbase:
+        condition: service_healthy
+    expose:
+      - '80'
+    networks:
+      - dokploy-network
+      - backend
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '-O', '/dev/null', 'http://127.0.0.1/health']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  pocketbase:
+    image: ${TYPEE_IMAGE_PREFIX:?Set TYPEE_IMAGE_PREFIX in Dokploy}-pocketbase:latest
+    pull_policy: always
+    restart: unless-stopped
+    expose:
+      - '8090'
+    networks:
+      - backend
+    volumes:
+      - pocketbase_data:/pb/pb_data
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '-O', '/dev/null', 'http://127.0.0.1:8090/api/health']
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+networks:
+  dokploy-network:
+    external: true
+  backend:
+
+volumes:
+  pocketbase_data:
+    name: typee-pocketbase-data
