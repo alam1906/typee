@@ -27,9 +27,8 @@ COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
 COPY deploy/start.sh /usr/local/bin/start-typee
 RUN chmod +x /usr/local/bin/start-typee
 
-EXPOSE 80
+EXPOSE 80 8090
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
     CMD wget -q -O /dev/null http://127.0.0.1/health && wget -q -O /dev/null http://127.0.0.1/api/health
 ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["/usr/local/bin/start-typee"]
-

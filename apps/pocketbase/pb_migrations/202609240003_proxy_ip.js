@@ -1,6 +1,6 @@
 migrate((app) => {
 	const settings = app.settings();
-	// PocketBase listens on loopback behind Nginx, with Traefik as the public entry point.
+	// PocketBase receives traffic through Nginx or Traefik, not from a published host port.
 	settings.trustedProxy.headers = ['X-Forwarded-For'];
 	app.save(settings);
 });
