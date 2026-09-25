@@ -30,9 +30,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    strategy:
-      matrix:
-        service: [web, pocketbase]
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-qemu-action@v3
@@ -46,39 +43,38 @@ jobs:
         id: image
         shell: bash
         run: |
-          prefix="ghcr.io/${GITHUB_REPOSITORY,,}"
-          echo "name=${prefix}-${{ matrix.service }}" >> "$GITHUB_OUTPUT"
+          echo "name=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
       - uses: docker/build-push-action@v6
         with:
           context: .
-          file: deploy/Dockerfile.${{ matrix.service }}
+          file: deploy/Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
             ${{ steps.image.outputs.name }}:latest
             ${{ steps.image.outputs.name }}:${{ github.sha }}
-          cache-from: type=gha,scope=${{ matrix.service }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   deploy:
     needs: publish
     runs-on: ubuntu-latest
     steps:
-      - name: Ask Dokploy to pull the published images
+      - name: Ask Dokploy to pull the published image
         env:
           DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
           DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
-          DOKPLOY_COMPOSE_ID: ${{ secrets.DOKPLOY_COMPOSE_ID }}
+          DOKPLOY_APPLICATION_ID: ${{ secrets.DOKPLOY_APPLICATION_ID }}
         shell: bash
         run: |
           set -euo pipefail
           : "${DOKPLOY_URL:?Set DOKPLOY_URL in GitHub Actions secrets}"
           : "${DOKPLOY_API_KEY:?Set DOKPLOY_API_KEY in GitHub Actions secrets}"
-          : "${DOKPLOY_COMPOSE_ID:?Set DOKPLOY_COMPOSE_ID in GitHub Actions secrets}"
+          : "${DOKPLOY_APPLICATION_ID:?Set DOKPLOY_APPLICATION_ID in GitHub Actions secrets}"
           curl --fail-with-body --show-error --silent \
             --connect-timeout 10 \
             --max-time 60 \
-            -X POST "${DOKPLOY_URL%/}/api/compose.deploy" \
+            -X POST "${DOKPLOY_URL%/}/api/application.deploy" \
             -H "x-api-key: ${DOKPLOY_API_KEY}" \
             -H 'Content-Type: application/json' \
-            --data "{\"composeId\":\"${DOKPLOY_COMPOSE_ID}\",\"title\":\"Typee ${GITHUB_SHA}\"}"
+            --data "{\"applicationId\":\"${DOKPLOY_APPLICATION_ID}\",\"title\":\"Typee ${GITHUB_SHA}\"}"
